@@ -1,4 +1,4 @@
-import esbuild from 'esbuild'
+import ezburn from 'ezburn'
 import typescript from 'typescript'
 import babel from '@babel/core'
 import swc from '@swc/core'
@@ -14,10 +14,10 @@ console.log('Converting TypeScript to JavaScript...')
 const js = typescript.transpileModule(ts, { compilerOptions: { target: typescript.ScriptTarget.ESNext } }).outputText
 fs.writeFileSync('./decorator-tests.js', `// Note: Edit "decorator-tests.ts" instead of this file\n${js}`)
 
-// Check esbuild
-await checkBehavior('esbuild', `esbuild@${require('esbuild/package.json').version}`,
-  () => esbuild.transformSync(js, { target: 'es2022' }).code, [
-  '* Class binding references are incorrect if a decorator changes them. ([Bug #3787](https://github.com/evanw/esbuild/issues/3787))',
+// Check ezburn
+await checkBehavior('ezburn', `ezburn@${require('ezburn/package.json').version}`,
+  () => ezburn.transformSync(js, { target: 'es2022' }).code, [
+  '* Class binding references are incorrect if a decorator changes them. ([Bug #3787](https://github.com/khulnasoft/ezburn/issues/2))',
 ])
 
 // Check Babel
@@ -74,7 +74,7 @@ async function checkBehavior(name, packageAndVersion, code, knownIssues) {
 function hackToFixInvalidCode(code) {
   outer: while (true) {
     try {
-      esbuild.transformSync(code)
+      ezburn.transformSync(code)
       new Function(code)
       return code
     }
@@ -139,7 +139,7 @@ function hackToFixInvalidCode(code) {
       }
 
       fs.writeFileSync('code.js', code)
-      esbuild.transformSync(code, { logLevel: 'warning' })
+      ezburn.transformSync(code, { logLevel: 'warning' })
       throw err
     }
   }
